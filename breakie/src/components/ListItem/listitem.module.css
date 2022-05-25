@@ -1,0 +1,50 @@
+.label__checkbox {
+  position: relative;
+  width: 240px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+  color: #222222;
+  display: flex;
+  align-items: center;
+}
+.list__item span {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 12px;
+  width: 90px;
+}
+.list__item {
+  height: 36px;
+  left: 0px;
+  top: 86px;
+  margin: 0 0 0.3rem 0;
+  padding: 0 0.8rem;
+  display: flex;
+  align-items: center;
+
+  border-bottom: 1px solid #8c8c8c;
+}
+
+/* .list__item::after {
+  content: '';
+  position: absolute;
+
+  height: 0px;
+
+  left: 0;
+  margin-top: 30px;
+  border: 4px solid red;
+  width: 100%;
+} */
+.filterlist input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  padding-left: 0;
+  display: block;
+  margin-right: 5px;
+}
+.filterlist input[type='checkbox']:checked {
+  display: block;
+}
