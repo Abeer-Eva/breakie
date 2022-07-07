@@ -5,7 +5,8 @@ import classes from './breakie.module.css';
 import fysisk from '../../assets/fysisk.svg';
 import social from '../../assets/social.svg';
 import mental from '../../assets/mental.svg';
-import { useNavigate } from 'react-router-dom';
+import Alert from '../../components/Alert/Alert';
+import End from '../../components/Breakieend/End';
 
 const Breakie = () => {
   const { activities } = useContext(AppContext);
@@ -13,7 +14,10 @@ const Breakie = () => {
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [minutes, setMinutes] = useState(0);
-  const navigate = useNavigate();
+  const [img, setImg] = useState('');
+  const [start, setStart] = useState(true);
+  const [end, setEnd] = useState(false);
+  const [show, setShow] = useState(false);
 
   const getRandom = async () => {
     //Random Breakie
@@ -26,36 +30,45 @@ const Breakie = () => {
       setSeconds(0);
     }
 
-
     setLoading(false);
   };
 
-  const updateRemainingTime = useCallback((s: any, m: any) => {
+
+  const updateRemainingTime = (s: any, m: any) => {
     setSeconds(s);
     setMinutes(m);
-  }, []);
+  };
 
-  useEffect(() => {
-
-    //Timer countdown
+  const timer = () => {
     let s = seconds;
+
     let m = minutes;
+
     const int = setInterval(() => {
       s--;
-      if (s < 0) {
-        m--;
+      if (s <= 0) {
         s = 59;
+        m--;
+        if (seconds == 55) {
+          console.log('s');
+        }
         if (m < 0) {
-          navigate('/');
+          s = 0;
+          m = 0;
+
+          setEnd(true);
+          clearInterval(int);
         }
       }
+
       updateRemainingTime(s, m);
     }, 1000);
+
     return () => {
       clearInterval(int);
     };
-  }, [random]);
-  
+  };
+
   useEffect(() => {
     getRandom();
   }, [activities]);
@@ -67,29 +80,44 @@ const Breakie = () => {
 
     randomUrl =
       random && random.URL.includes('youtube') ? (
-        <embed src={`${newURL}?autoplay=1&mute=1`} width='100%' type='video/mp4' height='100%'></embed>
+        <embed
+          src={`${newURL}`}
+          width='100%'
+          type='video/mp4'
+          height='100%'
+        ></embed>
       ) : (
         //"https://www.youtube.com/embed/i8n1gSw_o_8"
         <img src={random.URL} alt='breakie-image' />
       );
-    console.log(`${newURL}?autoplay=1`)
+  } else {
+    if (random && random.type == 'fysisk') {
+      randomUrl = <img  src={fysisk} alt='fysisk'/>;
+    } else if (random && random.type == 'social') {
+      randomUrl = <img  src={social} alt='social' />;
+    } else {
+      randomUrl = <img  src={mental} alt='social' />;
+    }
   }
+  const showEnd = () => {
+    setShow(!show);
+  };
 
   //Type icon in breakie header
   let imgtype;
-  if (random && random.type == "fysisk") {
-    imgtype =
-      <img src={fysisk} alt='fysisk' />
+  if (random && random.type == 'fysisk') {
+    imgtype = <img src={fysisk} alt='fysisk' />;
+  } else if (random && random.type == 'social') {
+    imgtype = <img src={social} alt='social' />;
+  } else {
+    imgtype = <img src={mental} alt='social' />;
   }
-  else if (random && random.type == "social") {
-    imgtype =
-      <img src={social} alt='social' />
-  }
-  else {
-    imgtype =
-      <img src={mental} alt='social' />
-  }
-
+  // console.log(mental);
+  const startBreakie = () => {
+    setStart(false);
+    timer();
+  };
+  
   return (
     <>
       {random ? (
@@ -105,7 +133,7 @@ const Breakie = () => {
                 </div>
                 <div>
                   <span className={classes.time}>
-                    0{minutes}:{seconds < 10 ? 0 : null}
+                    {minutes}:{seconds < 10 ? 0 : null}
                     {seconds}
                   </span>
                   <span>minuter</span>
@@ -113,15 +141,36 @@ const Breakie = () => {
               </div>
             </div>
 
-            <div className={classes.image}>{randomUrl}</div>
+            <div className={classes.image}>
+              {start && <Alert startBreakie={startBreakie} />}
+
+              {randomUrl}
+            </div>
             <div className={classes.description}>
               <p>{random.desc}</p>
+            </div>
+
+            <div>
+              {!start && (
+                <button
+                  disabled={!end}
+                  onClick={showEnd}
+                  className={
+                    end
+                      ? `${classes.avsluta} ${classes.active} `
+                      : classes.avsluta
+                  }
+                >
+                  Avsluta breakien
+                </button>
+              )}
             </div>
           </div>
         </div>
       ) : (
         'loading'
       )}
+      {show && <End />}
     </>
   );
 };

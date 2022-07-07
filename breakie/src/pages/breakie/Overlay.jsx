@@ -112,7 +112,7 @@ const Overlay = ({ choseList, showFavoriteItems, removeItem }) => {
       </span>
       <div className={classes.modal}>
         <button
-          disabled={choseList.length === 0}
+          disabled={choseList.length == 0}
           className={classes.favo}
           onClick={() => saveLocalStorage()}
         >

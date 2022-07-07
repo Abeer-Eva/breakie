@@ -5,6 +5,7 @@ import social from '../../assets/social.svg';
 import classes from './InputBrakie.module.css';
 import { db } from '../../backend/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import Modal from '../../components/Modal/Modal';
 const InputBrakie = () => {
   const [activity, setActivity] = useState('');
 
@@ -12,6 +13,7 @@ const InputBrakie = () => {
   const [time, setTime] = useState('');
   const [URL, setURL] = useState('');
   const [instruction, setInstruction] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const nameHandler = (e) => {
     setName(e.target.value);
   };
@@ -22,19 +24,31 @@ const InputBrakie = () => {
   const instrctionHandler = (e) => {
     setInstruction(e.target.value);
   };
+  const closeModal = () => {
+    setShowModal(false);
+    setName('');
+    setTime('');
+    setURL('');
+    setInstruction('');
+    setActivity('');
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!activity || !time || !instruction || !name) {
+      console.log('please provide all value');
+    }
+
     try {
-      if (activity && time && URL && instruction && name) {
-        const docRef = await addDoc(collection(db, 'Breakies'), {
+      if (activity && time && instruction && name) {
+        await addDoc(collection(db, 'Breakies'), {
           type: activity,
           desc: instruction,
           time,
           name,
           URL,
         });
-        console.log('added');
+        setShowModal(true);
       }
     } catch (error) {
       console.log(error.message);
@@ -43,6 +57,7 @@ const InputBrakie = () => {
 
   return (
     <>
+      {showModal && <Modal closeModal={closeModal} name={name} />}
       <div className={classes.form}>
         <form onSubmit={submitHandler}>
           <div className={classes.header}>
@@ -159,7 +174,11 @@ const InputBrakie = () => {
             ></textarea>
           </div>
         </form>
-        <button onClick={submitHandler} type='submit'>
+        <button
+          onClick={submitHandler}
+          className={classes.button}
+          type='submit'
+        >
           Skapa breakien
         </button>
       </div>

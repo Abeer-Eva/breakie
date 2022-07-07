@@ -15,26 +15,100 @@ import {
 import { db } from '../../backend/firebase';
 const Form = () => {
   const [activity, setActivity] = useState('');
+  const [type, setType] = useState(new Array());
+
   const [time, setTime] = useState('');
+  const [timesArray, setTimesArray] = useState(new Array());
+
+  const [istoggle, setIstoggle] = useState(false);
+
   const { getData } = useContext(AppContext);
+
+
+  /////////////////////Firebase ////////////////////
   const getbreakie = async () => {
-    if (activity.length) {
-      const q1 = query( collection(db, 'Breakies'),   where('type', '==', activity)  );
+    if (type.length && !timesArray.length) {
+      const q1 = query(collection(db, 'Breakies'), where('type', 'in', type));
       const breakieSnapshot = await getDocs(q1);
-      const breakielist: DocumentData[] = breakieSnapshot.docs
-        .map((doc) => doc.data())
-        .filter((doc) => doc.time == time);
-      getData(breakielist);
+      const typelist: DocumentData[] = breakieSnapshot.docs.map((doc) =>
+        doc.data()
+      );
+      console.log(typelist);
+      getData(typelist);
     }
+
+    if (timesArray.length && !type.length) {
+      console.log(timesArray.length)
+      console.log(timesArray)
+      console.log(time)
+      const q2 = query(collection(db, 'Breakies'), where('time', 'in', timesArray));
+      const timeSnapshot = await getDocs(q2);
+      console.log(timeSnapshot)
+      const timelist: DocumentData[] = timeSnapshot.docs.map((doc) =>
+        doc.data()
+      );
+      console.log(timelist);
+      getData(timelist);
+    }
+
+    if (type.length && timesArray.length) {
+      const q = query(
+        collection(db, 'Breakies'),
+        where('type', 'in', type)
+      );
+      const breakieSnapshot = await getDocs(q);
+      const breakielist: DocumentData[] = breakieSnapshot.docs.map((doc) =>
+        doc.data()
+      ).filter((i: any) => i.time === timesArray[Math.floor(Math.random() * timesArray.length)])
+      getData(breakielist)
+    }
+
   };
+  /////////////////////////////////////////////////////////////77
   const navigate = useNavigate();
   const submitHandler = (e: any) => {
     e.preventDefault();
-    if (activity && time) {
+    if (activity || time) {
       getbreakie();
       navigate('/breakie');
     } else {
       navigate('/manuall');
+    }
+  };
+  //////////////////////////////////////////////////////////////////7
+  const activChoose = (choose: any) => {
+    let y = type.find((item) => item === choose);
+    if (y) {
+      setActivity(choose);
+    }
+    let t = timesArray.find((item) => item === choose);
+    if (t) {
+      setTime(choose);
+    }
+  };
+
+  const Toggle = (x: any) => {
+    if (!type.includes(x)) {
+      type.push(x);
+      activChoose(x);
+    } else {
+      let A: any = [...type];
+      let idx: number = A.findIndex((i: any) => i === x);
+      type.splice(idx);
+      setIstoggle(!istoggle)
+
+    }
+  };
+
+  const Toggletime = (x: any) => {
+    if (!timesArray.includes(x)) {
+      timesArray.push(x);
+      activChoose(x);
+    } else {
+      let B: any = [...timesArray];
+      let idx: number = B.findIndex((i: any) => i === x);
+      timesArray.splice(idx);
+      setIstoggle(!istoggle)
     }
   };
 
@@ -46,34 +120,37 @@ const Form = () => {
         </div>
         <div className={classes.activities}>
           <div
+
             className={
-              activity === 'fysisk'
+              type.find((item) => item === 'fysisk')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setActivity('fysisk')}
+            onClick={() => Toggle('fysisk')}
           >
             <img src={fysisk} alt='fysisk' />
             <span>fysisk</span>
           </div>
           <div
+
             className={
-              activity === 'mental'
+              type.find((item) => item === 'mental')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setActivity('mental')}
+            onClick={() => Toggle('mental')}
           >
             <img src={mental} alt='mental' />
             <span>mental</span>
           </div>
           <div
+
             className={
-              activity === 'social'
+              type.find((item) => item === 'social')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setActivity('social')}
+            onClick={() => Toggle('social')}
           >
             <img src={social} alt='social' />
             <span>social</span>
@@ -85,11 +162,11 @@ const Form = () => {
         <div className={classes.activities}>
           <div
             className={
-              time === '1'
+              timesArray.find((item) => item === '1')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setTime('1')}
+            onClick={() => Toggletime('1')}
           >
             <div className={classes.tidinfo}>
               <p> &#60; 1</p>
@@ -98,11 +175,11 @@ const Form = () => {
           </div>
           <div
             className={
-              time === '2'
+              timesArray.find((item) => item === '2')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setTime('2')}
+            onClick={() => Toggletime('2')}
           >
             <div className={classes.tidinfo}>
               <p> 1-2</p>
@@ -111,11 +188,11 @@ const Form = () => {
           </div>
           <div
             className={
-              time === '3'
+              timesArray.find((item) => item === '3')
                 ? `${classes.formcontrol} ${classes.active} `
                 : classes.formcontrol
             }
-            onClick={() => setTime('3')}
+            onClick={() => Toggletime('3')}
           >
             <div className={classes.tidinfo}>
               <p>3+</p>
@@ -125,7 +202,9 @@ const Form = () => {
         </div>
 
         <button className={classes.button}>
-          {activity ? 'Slumpa fram en breakie' : 'Välj specifik Breakie'}
+          {type.length || timesArray.length
+            ? 'Slumpa fram en breakie'
+            : 'Välj specifik Breakie'}
         </button>
       </form>
     </>

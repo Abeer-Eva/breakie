@@ -18,19 +18,22 @@ const initialState = {
 const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [show, setShow] = useState(false);
-  const openOverlay = () => { setShow(!show); };
-
-
+  const toggleOverlay = () => {
+    setShow(!show);
+  };
 
   const getData = (data) => {
     dispatch({ type: 'SET_DATA', payload: data });
+    console.log(data)
   };
   const chooseData = (data) => {
     dispatch({ type: 'CHOOSE_DATA', payload: data });
   };
 
   return (
-    <AppContext.Provider value={{ ...state, getData, chooseData, openOverlay, show }}>
+    <AppContext.Provider
+      value={{ ...state, getData, chooseData, toggleOverlay, show }}
+    >
       {children}
     </AppContext.Provider>
   );
